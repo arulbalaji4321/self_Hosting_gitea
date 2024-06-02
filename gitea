@@ -1,0 +1,87 @@
+server {
+    server_name gitea.arulbalaji.xyz;
+
+    # Redirect the root URL to /explore/repos
+    location = / {
+        return 301 /explore/repos;
+    }
+
+    # Pass all other requests to the Gitea server
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 1000M; # Adjust as needed
+    }
+
+    location ~ ^/(attachments|avatars|css|img|js|fonts|plugins)/ {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Ssl on;
+        proxy_buffering off;
+        expires 30d;
+        client_max_body_size 1000M; # Adjust as needed
+    }
+
+    location /user/avatar/ {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Ssl on;
+        proxy_buffering off;
+        expires 30d;
+        client_max_body_size 1000M; # Adjust as needed
+    }
+
+    location /repository/avatar/ {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Ssl on;
+        proxy_buffering off;
+        expires 30d;
+        client_max_body_size 1000M; # Adjust as needed
+    }
+
+    location /api/v1/user/gravatar {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Ssl on;
+        proxy_buffering off;
+        expires 30d;
+        client_max_body_size 1000M; # Adjust as needed
+    }
+
+    location ~ /.well-known {
+        allow all;
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/gitea.arulbalaji.xyz/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/gitea.arulbalaji.xyz/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+server {
+    if ($host = gitea.arulbalaji.xyz) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen 80;
+    server_name gitea.arulbalaji.xyz;
+    return 404; # managed by Certbot
+}
+
